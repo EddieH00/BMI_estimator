@@ -7,18 +7,17 @@ import config
 
 detector = dlib.get_frontal_face_detector()
 
-def crop_faces():
+def crop_faces(image_dir_path, cropped_dir_path):
     bad_crop_count = 0
-    print(config.CROPPED_IMGS_DIR)
-    if not os.path.exists(config.CROPPED_IMGS_DIR):
-        os.makedirs(config.CROPPED_IMGS_DIR)
-    print ('Cropping faces and saving to %s' % config.CROPPED_IMGS_DIR)
+    if not os.path.exists(cropped_dir_path):
+        os.makedirs(cropped_dir_path)
+    print ('Cropping faces and saving to %s' % cropped_dir_path)
     good_cropped_images = []
     good_cropped_img_file_names = []
     detected_cropped_images = []
     original_images_detected = []
-    for file_name in sorted(os.listdir(config.ORIGINAL_IMGS_DIR)):
-        np_img = cv2.imread(os.path.join(config.ORIGINAL_IMGS_DIR,file_name))
+    for file_name in sorted(os.listdir(image_dir_path)):
+        np_img = cv2.imread(os.path.join(image_dir_path, file_name))
         detected = detector(np_img, 1)
         img_h, img_w, _ = np.shape(np_img)
         original_images_detected.append(np_img)
@@ -34,7 +33,7 @@ def crop_faces():
         xw2 = int(x2 + config.MARGIN * w)
         yw2 = int(y2 + config.MARGIN * h)
         cropped_img = crop_image_to_dimensions(np_img, xw1, yw1, xw2, yw2)
-        norm_file_path = '%s/%s' % (config.CROPPED_IMGS_DIR, file_name)
+        norm_file_path = '%s/%s' % (cropped_dir_path, file_name)
         cv2.imwrite(norm_file_path, cropped_img)
 
         good_cropped_img_file_names.append(file_name)
@@ -52,7 +51,7 @@ def crop_faces():
             f.write('%s\n' % l)
     '''
 
-    print ('Cropped %d images and saved in %s - info in %s' % (len(original_images_detected), config.CROPPED_IMGS_DIR, config.CROPPED_IMGS_INFO_FILE))
+    print ('Cropped %d images and saved in %s' % (len(original_images_detected), cropped_dir_path))
     #print ('Error detecting face in %d images - info in Data/unnormalized.txt' % bad_crop_count)
     return good_cropped_images
 
@@ -76,4 +75,6 @@ def pad_img_to_fit_bbox(img, x1, x2, y1, y2):
 if __name__ == '__main__':
     #need to change config file ORIGINAL_IMGS_DIR = 'data/test' to location of images
     #also to store the cropped part to CROPPED_IMGS_DIR = 'data/test_cropped'
-    crop_faces()
+    image_dir = '../data/test'
+    cropped_dir = '../data/cropped'
+    crop_faces(image_dir, cropped_dir)
